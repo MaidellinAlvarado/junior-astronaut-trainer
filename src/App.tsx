@@ -82,7 +82,7 @@ export default function App() {
     setMessage('🔧 ¡Paneles reparados! +20% Energía (-4% Oxígeno).');
   };
 
-  const handleRecycleAir = () => {
+const handleRecycleAir = () => {
     if (oxygen >= 100) {
       setMessage('🟢 ¡La reserva de oxígeno estelar está al 100%!');
       return;
@@ -92,7 +92,7 @@ export default function App() {
       return;
     }
     setOxygen(prev => Math.min(100, Number((prev + 15).toFixed(1))));
-    setEnergy(prev => Math.max(0, energy - 15));
+    setEnergy(prev => Math.max(0, prev - 15)); // <-- Cambiamos 'prev' por 'energy' o usamos 'prev => Math.max(0, prev - 15)'
     setMessage('♻️ ¡Filtros estelares activados! +15% Oxígeno (-15% Energía).');
   };
 
