@@ -58,3 +58,9 @@ npm install
 
 # 4. Inicia el servidor de desarrollo
 npm run dev
+
+
+---
+
+## 👩‍💻 Autor
+* **Maidellin Alvarado** — *Desarrollo Full-Stack & Ingeniería en Sistemas (USAC)* — [GitHub de MaidellinAlvarado](https://github.com/MaidellinAlvarado)
