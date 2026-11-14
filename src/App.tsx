@@ -4,13 +4,43 @@ export default function App() {
   const [sol, setSol] = useState(1);
   const [oxygen, setOxygen] = useState(100); 
   const [energy, setEnergy] = useState(100); 
-  const [timeLeft, setTimeLeft] = useState(10);
+  const [timeLeft, setTimeLeft] = useState(5);
   const [activeEvent, setActiveEvent] = useState(false);
   const [eventtype, setEventType] = useState<'solar' | 'dust'>('solar');
   const [gameOver, setGameOver] = useState<string | null>(null);
   const [gameWon, setGameWon] = useState(false);
   const [message, setMessage] = useState('¡Estación Artemis lista para la aventura galáctica!');
-  const [explorerState, setExplorerState] = useState('🌟 Flotando y explorando la galaxia');
+  const [explorerState, setExplorerState] = useState('Flotando y explorando la galaxia');
+
+  // Generador de sonido  usando api de donki tiempo real.
+  const playAlarmSound = () => {
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.type = 'sawtooth'; 
+      oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); 
+      oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.2); 
+
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.4);
+    } catch (e) {
+      console.log("Audio no soportado o bloqueado por el navegador", e);
+    }
+  };
+
+  // Efecto de sonido y animación cuando se activa una alerta 
+  useEffect(() => {
+    if (activeEvent) {
+      playAlarmSound();
+    }
+  }, [activeEvent]);
 
   const advanceDay = () => {
     const nextSol = sol + 1;
@@ -35,13 +65,13 @@ export default function App() {
     setSol(nextSol);
     setOxygen(nextOxygen);
     setEnergy(nextEnergy);
-    setTimeLeft(10);
+    setTimeLeft(5);
 
     const states = [
-      '🌟 Navegando entre nebulosas estelares',
-      '🪐 Explorando anillos planetarios',
-      '🌠 Recolectando polvo de estrellas',
-      '🛰️ Activando escudos de energía cósmica'
+      '🌟 Navegando hacia nuevos sistemas estelares',
+      '🪐 Sigue avanzando estamos Surcando junto a anillos planetarios gigantes',
+      '🌠 Avanzando a través de nebulosas lejanas',
+      '🛰️ Explorando la frontera cósmica profunda'
     ];
     setExplorerState(states[Math.floor(Math.random() * states.length)]);
 
@@ -82,7 +112,7 @@ export default function App() {
     setMessage('🔧 ¡Paneles reparados! +20% Energía (-4% Oxígeno).');
   };
 
-const handleRecycleAir = () => {
+  const handleRecycleAir = () => {
     if (oxygen >= 100) {
       setMessage('🟢 ¡La reserva de oxígeno estelar está al 100%!');
       return;
@@ -92,7 +122,7 @@ const handleRecycleAir = () => {
       return;
     }
     setOxygen(prev => Math.min(100, Number((prev + 15).toFixed(1))));
-    setEnergy(prev => Math.max(0, prev - 15)); // <-- Cambiamos 'prev' por 'energy' o usamos 'prev => Math.max(0, prev - 15)'
+    setEnergy(prev => Math.max(0, prev - 15));
     setMessage('♻️ ¡Filtros estelares activados! +15% Oxígeno (-15% Energía).');
   };
 
@@ -173,188 +203,222 @@ const handleRecycleAir = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans select-none">
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-between p-4 relative overflow-hidden font-sans select-none">
       
-      {/* ================= stilo mario galaxy ================= */}
+      {/* Animaciones CSS personalizadas */}
+      <style>{`
+        @keyframes forwardTravel {
+          0% { transform: translateY(0px) scale(1); }
+          50% { transform: translateY(-14px) scale(1.04); }
+          100% { transform: translateY(0px) scale(1); }
+        }
+        @keyframes scrollStars {
+          from { background-position: 0 0; }
+          to { background-position: 0 1000px; }
+        }
+        @keyframes driftPlanetLeft {
+          0% { transform: translate(-100px, -50px) rotate(0deg); opacity: 0.25; }
+          50% { transform: translate(100px, 80px) rotate(180deg); opacity: 0.55; }
+          100% { transform: translate(-100px, -50px) rotate(360deg); opacity: 0.25; }
+        }
+        @keyframes driftPlanetRight {
+          0% { transform: translate(100px, 60px) rotate(0deg); opacity: 0.25; }
+          50% { transform: translate(-120px, -80px) rotate(-180deg); opacity: 0.55; }
+          100% { transform: translate(100px, 60px) rotate(-360deg); opacity: 0.25; }
+        }
+        .animate-travel {
+          animation: forwardTravel 3s ease-in-out infinite;
+        }
+        .bg-stars-moving {
+          background-image: radial-gradient(#ffffff 2px, transparent 2px);
+          background-size: 50px 50px;
+          animation: scrollStars 15s linear infinite;
+        }
+        .planet-giant-1 {
+          animation: driftPlanetLeft 18s ease-in-out infinite;
+        }
+        .planet-giant-2 {
+          animation: driftPlanetRight 22s ease-in-out infinite;
+        }
+      `}</style>
+
+      {/* Fondo Inmersivo */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Nebulosas de fondo */}
-        <div className="absolute top-[-20%] left-[-10%] w-[700px] h-[700px] bg-blue-600/30 rounded-full blur-[160px] animate-pulse"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[700px] h-[700px] bg-purple-600/30 rounded-full blur-[160px] animate-pulse"></div>
-        <div className="absolute top-[25%] right-[10%] w-[500px] h-[500px] bg-cyan-400/20 rounded-full blur-[140px]"></div>
+        <div className="absolute inset-0 opacity-70 bg-stars-moving"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[700px] h-[700px] bg-blue-600/20 rounded-full blur-[180px] animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[700px] h-[700px] bg-purple-600/20 rounded-full blur-[180px] animate-pulse"></div>
 
-        {/* Rayo de luz diagonal */}
-        <div className="absolute -top-40 -left-40 w-[800px] h-[200px] bg-gradient-to-r from-cyan-400/40 via-blue-500/20 to-transparent rotate-45 blur-3xl pointer-events-none"></div>
-
-        {/* Estrellas de fondo */}
-        <div className="absolute inset-0 opacity-90 bg-[radial-gradient(#ffffff_1.8px,transparent_1.8px)] [background-size:32px_32px]"></div>
-
-    --- 
-        {/* Izquierda superior */}
-        <div className="absolute top-16 left-10 text-5xl animate-[bounce_3s_infinite] filter drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]">
-          ⭐
-        </div>
-        {/* Izquierda media */}
-        <div className="absolute top-1/2 left-8 text-6xl animate-pulse filter drop-shadow-[0_0_20px_rgba(14,165,233,0.8)]">
+        <div className="absolute top-10 left-[-40px] md:left-10 text-[9rem] md:text-[14rem] planet-giant-1 filter drop-shadow-[0_0_50px_rgba(14,165,233,0.5)] z-0 select-none">
           🪐
         </div>
-        {/* Izquierda inferior */}
-        <div className="absolute bottom-16 left-12 text-5xl animate-[pulse_2s_infinite]">
-          🛸
-        </div>
-
-        {/* Derecha superior */}
-        <div className="absolute top-20 right-12 text-6xl animate-[bounce_4s_infinite] filter drop-shadow-[0_0_20px_rgba(192,132,252,0.8)]">
-          🌙
-        </div>
-        {/* Derecha media */}
-        <div className="absolute top-1/2 right-10 text-5xl animate-pulse filter drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]">
-          ✨
-        </div>
-        {/* Derecha inferior */}
-        <div className="absolute bottom-20 right-10 text-6xl animate-[bounce_3.5s_infinite]">
-          👨‍🚀🚀
+        <div className="absolute bottom-16 right-[-40px] md:right-10 text-[9rem] md:text-[14rem] planet-giant-2 filter drop-shadow-[0_0_50px_rgba(250,204,21,0.5)] z-0 select-none">
+          🌍
         </div>
       </div>
-      {/* ===================================================================================================== */}
 
-      {/* Contenedor Principal */}
-      <div className="relative z-10 flex flex-col items-center w-full max-w-lg space-y-6">
-        
-        {/* Personaje central y Título Galaxy */}
-        <div className="text-center space-y-3">
-          <div className="relative inline-flex items-center justify-center p-5 bg-gradient-to-tr from-cyan-400/40 via-blue-600/40 to-purple-600/40 border-4 border-cyan-300 rounded-full shadow-[0_0_50px_rgba(34,211,238,0.8)] animate-[bounce_2s_infinite]">
-            <span className="text-6xl filter drop-shadow-[0_0_20px_rgba(255,255,255,1)] inline-block">
-              👩‍🚀⭐
-            </span>
-            <div className="absolute -bottom-2 px-3.5 py-1 bg-yellow-400 text-slate-950 font-black text-xs rounded-full uppercase tracking-widest shadow-xl">
-              ¡SUPER ESTRELLA!
-            </div>
+      {/* ZONA SUPERIOR */}
+      <div className="relative z-10 flex flex-col items-center pt-4 space-y-2">
+        <div className="flex items-center justify-between w-full max-w-2xl px-6">
+          <div className="bg-indigo-950/80 px-4 py-2 rounded-2xl border-2 border-cyan-400 shadow-lg backdrop-blur-md">
+            <span className="text-cyan-300 font-extrabold text-sm">ARTEMIS GALAXY - Sol {sol} / 10</span>
           </div>
-          
-          <div className="inline-block bg-indigo-950/80 px-4 py-1.5 rounded-full border-2 border-cyan-400 shadow-lg">
-            <p className="text-cyan-200 text-sm font-extrabold tracking-wide">
+          <div className="bg-slate-900/80 px-4 py-2 rounded-2xl border-2 border-yellow-400 shadow-lg backdrop-blur-md flex items-center gap-2">
+            <span className="text-xs text-yellow-300 font-bold">SIGUIENTE SOL:</span>
+            <span className="font-mono text-yellow-400 font-black text-lg animate-pulse">{timeLeft}s</span>
+          </div>
+        </div>
+
+        <div className="relative my-3 flex flex-col items-center h-28 justify-center z-10">
+          <div className="text-8xl animate-travel filter drop-shadow-[0_0_40px_rgba(34,211,238,0.9)]">
+            👨‍🚀🚀
+          </div>
+          <div className="mt-1 px-4 py-1 bg-indigo-950/95 border-2 border-cyan-400 rounded-full shadow-[0_0_25px_rgba(34,211,238,0.6)] z-20">
+            <p className="text-cyan-200 text-xs font-black tracking-wide">
               {explorerState}
             </p>
           </div>
+        </div>
+      </div>
 
-          <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-white drop-shadow-[0_5px_15px_rgba(6,182,212,0.8)] tracking-wide">
-            ARTEMIS GALAXY - Sol {sol} / 10
-          </h1>
+{/* POP-UP  con INFORMACION DEL EVENTO */}
+{activeEvent && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fadeIn">
+    <div className="bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-900 border-4 border-yellow-400 p-6 rounded-3xl max-w-lg w-full shadow-[0_0_80px_rgba(250,204,21,0.6)] space-y-3">
+      
+      {/* Cabecera */}
+      <div className="flex items-center justify-between border-b border-yellow-500/40 pb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-3xl animate-bounce">
+            {eventtype === 'solar' ? '☀️' : '🌪️'}
+          </span>
+          <div>
+            <h3 className="text-yellow-300 font-black text-xs uppercase tracking-wider">
+              {eventtype === 'solar' ? '¡Alerta: Tormenta Solar!' : '¡Alerta: Polvo Estelar!'}
+            </h3>
+            <span className="text-[10px] text-cyan-300 font-mono font-bold">MISIÓN EDUCATIVA ARTEMIS</span>
+          </div>
+        </div>
+        <span className="text-[10px] bg-cyan-600 text-white px-2 py-0.5 rounded-full font-mono font-bold">INFO ESPACIAL</span>
+      </div>
+
+      {/* Contenido Explicativo estilo*/}
+      <div className="bg-slate-950/90 p-3.5 rounded-2xl border-2 border-cyan-500/40 space-y-2 text-left">
+        <div>
+          <span className="text-[11px] text-yellow-400 font-black">🧠 ¿Qué es?: </span>
+          <p className="text-[11px] text-cyan-100 leading-tight">
+            {eventtype === 'solar' 
+              ? '¡Una ráfaga de energía gigante que disparó el Sol! Viaja por el espacio y trae mucha electricidad.' 
+              : '¡Una nube de pequeñas partículas cósmicas flotando en el camino que ensucia nuestros paneles!'}
+          </p>
         </div>
 
-        {/* Panel de Control Estilo Cúpula Espacial */}
-        <div className="w-full bg-indigo-950/85 border-4 border-cyan-400/60 shadow-[0_0_70px_rgba(14,165,233,0.4)] p-8 space-y-6 backdrop-blur-2xl rounded-3xl relative overflow-hidden">
-          
-          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-cyan-400 via-yellow-400 to-purple-500"></div>
+        <div>
+          <span className="text-[11px] text-yellow-400 font-black">🛡️ Protocolo a seguir: </span>
+          <p className="text-[11px] text-cyan-100 leading-tight">
+            {eventtype === 'solar' 
+              ? 'Proteger los equipos y activar los escudos espaciales para cuidar la energía.' 
+              : 'Limpiar los cristales y paneles solares para recuperar la fuerza de la base lunar.'}
+          </p>
+        </div>
 
-          {/* Temporizador Galáctico */}
-          <div className="flex justify-between items-center bg-slate-950/80 p-4 rounded-2xl border-2 border-cyan-400/40 shadow-inner">
-            <span className="text-sm text-cyan-200 font-extrabold tracking-wide flex items-center gap-2">
-              <span className="text-xl">⏱️</span> Siguiente Sol en:
-            </span>
-            <span className="font-mono text-yellow-300 font-black text-2xl animate-pulse drop-shadow-[0_0_15px_rgba(250,204,21,0.9)]">
-              {timeLeft}s
-            </span>
-          </div>
+        <div className="pt-1 flex items-center justify-between border-t border-cyan-900/60 mt-1">
+          <span className="text-[9px] text-slate-400 italic">
+            Datos reales de la base de datos de la NASA (DONKI).
+          </span>
+          <a 
+            href="https://ccmc.gsfc.nasa.gov/DONKI/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-[10px] text-cyan-300 hover:text-cyan-200 font-bold underline flex items-center gap-1"
+          >
+            🔍 Saber más
+          </a>
+        </div>
+      </div>
 
-          <h2 className="text-sm font-black text-yellow-300 uppercase tracking-widest border-b-2 border-cyan-900/80 pb-2 flex items-center gap-2">
-            <span>🌌</span> ESTADO DE RECURSOS CÓSMICOS
-          </h2>
+      <p className="text-xs text-slate-100 font-black text-center pt-1">
+        ¿Qué acción tomará nuestro equipo, Comandante?
+      </p>
 
-          {/* Oxígeno */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm font-extrabold">
-              <span className="text-slate-100 flex items-center gap-1.5 text-base">🫁 Oxígeno Estelar</span>
-              <span className="text-cyan-300 font-mono text-lg">{oxygen}%</span>
+      {/* Botones de decisión */}
+      <div className="grid grid-cols-2 gap-2 pt-1">
+        <button 
+          onClick={handleEventChoiceA} 
+          className="py-2.5 px-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-2xl shadow-lg transition transform active:scale-95"
+        >
+          {eventtype === 'solar' ? '🔍 Buscar Tanque (+20% O2)' : '🧹 Limpiar Paneles (+25% Energía)'}
+        </button>
+        <button 
+          onClick={handleEventChoiceB} 
+          className="py-2.5 px-3 bg-slate-900 border-2 border-red-500 text-red-200 hover:bg-slate-800 font-black text-xs rounded-2xl transition transform active:scale-95"
+        >
+          🛡️ Activar Escudos
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
+
+      {/* ZONA INFERIOR */}
+      <div className="relative z-10 w-full max-w-2xl mx-auto bg-indigo-950/90 border-4 border-cyan-400/70 shadow-[0_0_50px_rgba(14,165,233,0.5)] p-4 backdrop-blur-xl rounded-3xl space-y-3 mb-1">
+        
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1 bg-slate-950/70 p-2.5 rounded-2xl border border-cyan-500/40">
+            <div className="flex justify-between text-xs font-extrabold">
+              <span className="text-cyan-200 flex items-center gap-1">🫁 Oxígeno</span>
+              <span className="text-cyan-300 font-mono">{oxygen}%</span>
             </div>
-            <div className="w-full bg-slate-950/80 rounded-full h-4 p-0.5 border-2 border-cyan-400/50 shadow-inner overflow-hidden">
+            <div className="w-full bg-slate-900 rounded-full h-2.5 p-0.5 border border-cyan-400/40">
               <div 
-                className="bg-gradient-to-r from-cyan-500 to-teal-300 h-full rounded-full transition-all duration-500 shadow-[0_0_20px_rgba(6,182,212,1)]" 
+                className="bg-gradient-to-r from-cyan-500 to-teal-300 h-full rounded-full transition-all duration-500 shadow-[0_0_15px_rgba(6,182,212,0.9)]" 
                 style={{ width: `${oxygen}%` }}
               ></div>
             </div>
           </div>
 
-          {/* Energía */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm font-extrabold">
-              <span className="text-slate-100 flex items-center gap-1.5 text-base">⚡ Energía Cósmica</span>
-              <span className="text-yellow-400 font-mono text-lg">{energy}%</span>
+          <div className="space-y-1 bg-slate-950/70 p-2.5 rounded-2xl border border-yellow-500/40">
+            <div className="flex justify-between text-xs font-extrabold">
+              <span className="text-yellow-200 flex items-center gap-1">⚡ Energía</span>
+              <span className="text-yellow-400 font-mono">{energy}%</span>
             </div>
-            <div className="w-full bg-slate-950/80 rounded-full h-4 p-0.5 border-2 border-yellow-400/50 shadow-inner overflow-hidden">
+            <div className="w-full bg-slate-900 rounded-full h-2.5 p-0.5 border border-yellow-400/40">
               <div 
-                className="bg-gradient-to-r from-amber-500 to-yellow-300 h-full rounded-full transition-all duration-500 shadow-[0_0_20px_rgba(250,204,21,1)]" 
+                className="bg-gradient-to-r from-amber-500 to-yellow-300 h-full rounded-full transition-all duration-500 shadow-[0_0_15px_rgba(250,204,21,0.9)]" 
                 style={{ width: `${energy}%` }}
               ></div>
             </div>
           </div>
+        </div>
 
-          {/* Botones de Acción */}
-          <div className="space-y-3 pt-3 border-t-2 border-cyan-900/80">
-            <p className="text-xs font-black text-yellow-300 tracking-wider uppercase">
-              🎮 CONTROLES DE LA NAVE:
-            </p>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <button 
-                onClick={handleRepairEnergy}
-                className="py-4 px-4 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-sm rounded-2xl shadow-lg shadow-amber-950/80 transform active:scale-95 transition-all border-2 border-yellow-200"
-              >
-                ⚡ Reparar Energía
-              </button>
-              <button 
-                onClick={handleRecycleAir}
-                className="py-4 px-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-cyan-950/80 transform active:scale-95 transition-all border-2 border-cyan-200"
-              >
-                ♻️ Reciclar Aire
-              </button>
-            </div>
-          </div>
-
-          {/* Consola de Mensajes */}
-          <div className="bg-slate-950/80 p-4 rounded-2xl border-2 border-cyan-400/30 text-center shadow-inner">
-            <p className="text-sm text-cyan-200 font-mono font-bold tracking-wide leading-relaxed">
+        <div className="flex flex-col md:flex-row items-center gap-2">
+          <div className="bg-slate-950/90 py-2 px-3 rounded-2xl border border-cyan-400/30 text-center flex-1 w-full">
+            <p className="text-xs text-cyan-200 font-mono font-bold">
               {message}
             </p>
           </div>
 
-          {/* Evento de Emergencia */}
-          {activeEvent && (
-            <div className="bg-gradient-to-br from-amber-950/95 to-red-950/95 border-4 border-yellow-400 p-5 rounded-2xl space-y-4 shadow-[0_0_40px_rgba(250,204,21,0.6)] animate-bounce">
-              <div className="flex items-center space-x-3">
-                <span className="text-3xl">⭐⚠️</span>
-                <h3 className="text-yellow-300 font-black text-base uppercase tracking-wider">
-                  {eventtype === 'solar' ? '¡TORMENTA DE RAYOS CÓSMICOS!' : '¡TORMENTA DE POLVO ESTELAR!'}
-                </h3>
-              </div>
-              <p className="text-sm text-slate-100 leading-relaxed font-bold">
-                {eventtype === 'solar' 
-                  ? '¡Un tanque de oxígeno estelar se soltó en la órbita exterior durante la tormenta!' 
-                  : '¡El polvo cósmico está bloqueando los paneles solares de la base!'}
-              </p>
-              <div className="space-y-2 pt-1">
-                <button 
-                  onClick={handleEventChoiceA} 
-                  className="w-full py-3 px-4 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black text-xs rounded-xl text-left shadow-md transition"
-                >
-                  {eventtype === 'solar' ? '🔍 Salir a buscarlo (-8% oxígeno, recuperas +20%)' : '🧹 Limpiar paneles (-10% energy, recuperas +25%)'}
-                </button>
-                <button 
-                  onClick={handleEventChoiceB} 
-                  className="w-full py-3 px-4 bg-transparent border-2 border-red-400 text-red-200 hover:bg-red-950/50 font-black text-xs rounded-xl text-left transition"
-                >
-                  ❌ Activar escudos y permanecer a salvo
-                </button>
-              </div>
-            </div>
-          )}
-
+          <div className="flex gap-2 w-full md:w-auto">
+            <button 
+              onClick={handleRepairEnergy}
+              className="flex-1 md:flex-none py-2.5 px-3 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-xs rounded-2xl shadow-lg transition transform active:scale-95 border-2 border-yellow-200"
+            >
+              ⚡ Reparar
+            </button>
+            <button 
+              onClick={handleRecycleAir}
+              className="flex-1 md:flex-none py-2.5 px-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black text-xs rounded-2xl shadow-lg transition transform active:scale-95 border-2 border-cyan-200"
+            >
+              ♻️ Reciclar
+            </button>
+          </div>
         </div>
 
-        {/* Atribución de la NASA */}
-        <footer className="text-center text-xs text-cyan-300/80 font-semibold tracking-wide">
-          Simulador educativo basado en misiones Artemis y registros de clima espacial (NASA DONKI).
-        </footer>
+        <div className="text-center pt-1 border-t border-cyan-900/60">
+          <span className="text-[10px] text-cyan-300/70 font-semibold">
+            Simulador educativo basado en misiones Artemis y registros de clima espacial (<a href="https://ccmc.gsfc.nasa.gov/tools/DONKI/" target="_blank" rel="noopener noreferrer" className="underline hover:text-cyan-200">NASA DONKI</a>).
+          </span>
+        </div>
 
       </div>
 
